@@ -8,6 +8,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
@@ -32,6 +33,8 @@ public class main extends JavaPlugin{
 	public static boolean replaceRune = false;
 	public static Random rndGen = new Random();
 	public static String socketLore = "";
+	public static boolean sendMoneymsg = false;
+	public static String runeTxt = "";
 	@Override
 	public void onEnable(){
 		if (!setupEconomy() ) {
@@ -53,6 +56,8 @@ public class main extends JavaPlugin{
 		geoFactor = cfg.getInt("geometricFactor");
 		replaceRune = cfg.getBoolean("replaceRuneWithSocket");
 		socketLore = cfg.getString("socketSpaceLore");
+		sendMoneymsg = cfg.getBoolean("sendMoneyMessage");
+		runeTxt = cfg.getString("runeText");
 		getLogger().info("Plugin enabled");
 	}
 	@Override
@@ -99,7 +104,9 @@ public class main extends JavaPlugin{
 							}
 							res = econ.withdrawPlayer((Player) sender, price);
 							if (res.transactionSuccess()){
-								sender.sendMessage(price + " have been taken from your account.");
+								if (sendMoneymsg){
+									sender.sendMessage(price + " have been taken from your account.");
+								}
 								boolean hasRune = false;
 								ItemMeta meta = null;
 								List<String> lore = null;
@@ -107,13 +114,13 @@ public class main extends JavaPlugin{
 								if (item.hasItemMeta()){
 									meta = item.getItemMeta();
 									lore = meta.getLore();
-									if (lore.contains("Rune of Protection")){
+									if (lore.contains(runeTxt)){
 										hasRune = true;
 									}
 								}
 								if (hasRune){
 									if (consumeRune || !success){
-										lore.remove("Rune of Protection");
+										lore.remove(runeTxt);
 										lore.add(socketLore);
 										meta.setLore(lore);
 										item.setItemMeta(meta);

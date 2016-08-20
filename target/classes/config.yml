@@ -6,3 +6,5 @@ limitToWeapons: true
 price: 300
 geometricEvolution: true
 geometricFactor: 2
+sendMoneyMessage: true
+runeText: "&4Rune of Protection"
