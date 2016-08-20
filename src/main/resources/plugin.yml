@@ -1,0 +1,11 @@
+name: enchantEvolution
+main: enchantEvolution.main
+version: 0.0.1-SNAPSHOT
+
+commands:
+    enchantevolve:
+        description: Evolve an enchant for a certain player
+        aliases: [ee]
+        usage: /enchantevolve player enchant
+        permission: enchantevolve.use
+        permission-message: Sorry, but you don't have the permission to execute this command

@@ -1,0 +1,8 @@
+alwaysConsumeRune: true
+socketSpaceLore: "(Socket)"
+replaceRuneWithSocket: true
+failChance: 30
+limitToWeapons: true
+price: 300
+geometricEvolution: true
+geometricFactor: 2
