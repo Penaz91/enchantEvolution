@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +30,6 @@ public class main extends JavaPlugin{
 	public static Economy econ = null;
 	public static final String defaultHelpMessage = "/ee <player> <enchant name>";
 	public static final String defaultPlayerErrorMessage = "The first parameter is not a player's IGN";
-	public static int evolutionPrice = 0;
 	public static boolean geometric = false;
 	public static int geoFactor = 0;
 	public static boolean replaceRune = false;
@@ -37,8 +37,9 @@ public class main extends JavaPlugin{
 	public static String socketLore = "";
 	public static boolean sendMoneymsg = false;
 	public static String runeTxt = "";
+	public static ConfigurationSection limits = null;
+	public static ConfigurationSection prices = null;
 	public static final Material[] weaponarr = {Material.WOOD_AXE, Material.WOOD_HOE, Material.WOOD_PICKAXE, Material.WOOD_SPADE, Material.WOOD_SWORD, Material.GOLD_AXE, Material.GOLD_BOOTS, Material.GOLD_CHESTPLATE, Material.GOLD_HELMET, Material.GOLD_HOE, Material.GOLD_LEGGINGS, Material.GOLD_PICKAXE, Material.GOLD_SPADE, Material.GOLD_SWORD, Material.IRON_AXE, Material.IRON_BOOTS, Material.IRON_CHESTPLATE, Material.IRON_HELMET, Material.IRON_HOE, Material.IRON_LEGGINGS, Material.IRON_PICKAXE, Material.IRON_SPADE, Material.IRON_SWORD,Material.DIAMOND_AXE, Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_HOE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_PICKAXE, Material.DIAMOND_SPADE, Material.DIAMOND_SWORD, Material.LEATHER_BOOTS, Material.LEATHER_CHESTPLATE, Material.LEATHER_HELMET,Material.LEATHER_LEGGINGS, Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS};
-	//public static final ArrayList<Material> weapons = Lists.newArrayList(weaponarr);
 	public static final String pluginName = ChatColor.DARK_RED + "[" + ChatColor.DARK_PURPLE + "EnchantEvolution" + ChatColor.DARK_RED + "]" + ChatColor.RESET + " ";
 	@Override
 	public void onEnable(){
@@ -56,13 +57,14 @@ public class main extends JavaPlugin{
 		failChance = cfg.getInt("failChance");
 		consumeRune = cfg.getBoolean("alwaysConsumeRune");
 		limitToWeapons = cfg.getBoolean("limitToWeapons");
-		evolutionPrice = cfg.getInt("price");
+		prices = cfg.getConfigurationSection("prices");
 		geometric = cfg.getBoolean("geometricEvolution");
 		geoFactor = cfg.getInt("geometricFactor");
 		replaceRune = cfg.getBoolean("replaceRuneWithSocket");
 		socketLore = cfg.getString("socketSpaceLore");
 		sendMoneymsg = cfg.getBoolean("sendMoneyMessage");
 		runeTxt = cfg.getString("runeText");
+		limits = cfg.getConfigurationSection("levelCaps");
 		getLogger().info("Plugin enabled");
 	}
 	@Override
@@ -87,6 +89,7 @@ public class main extends JavaPlugin{
 				getLogger().info(defaultHelpMessage);
 				return true;
 			}else{
+				@SuppressWarnings("deprecation")
 				Player pl =Bukkit.getPlayerExact(args[0]);
 				if (pl == null){
 					getLogger().info(pluginName + defaultPlayerErrorMessage + ": " + args[0]);
@@ -94,7 +97,6 @@ public class main extends JavaPlugin{
 				}else{
 					ItemStack item = pl.getInventory().getItemInMainHand();
 					if (limitToWeapons){
-						//code to check if it's a weapon
 						Material type = item.getData().getItemType();
 						boolean found = false;
 						for (Material it: weaponarr){
@@ -106,17 +108,16 @@ public class main extends JavaPlugin{
 							pl.sendMessage(pluginName + "This item is not enchantable");
 							return true;
 						}
-						/*if (!weapons.contains(type)){
-							sender.sendMessage(pluginName + "This item is not enchantable");
-							return true;
-						}*/
 					}
 					Enchantment ench = Enchantment.getByName(args[1]);
 					if (ench != null){
 						int level = item.getEnchantmentLevel(ench);
-						if (level < 10){
+						int cap = limits.getInt(ench.getName());
+						System.out.println("Enchantment " + ench.toString() + " level cap: " + cap);
+						if (level < cap){
 							EconomyResponse res = null;
 							double price = 0.;
+							double evolutionPrice = prices.getDouble(ench.getName());
 							if (geometric){
 								price = Math.pow(geoFactor, level+1) * evolutionPrice;
 							}else{
@@ -148,7 +149,9 @@ public class main extends JavaPlugin{
 								if (hasRune){
 									if (consumeRune || !success){
 										lore.remove(lore.get(toRemove));
-										lore.add(socketLore);
+										if (replaceRune){
+											lore.add(ChatColor.translateAlternateColorCodes('&', socketLore));
+										}
 										meta.setLore(lore);
 										item.setItemMeta(meta);
 									}
@@ -161,7 +164,7 @@ public class main extends JavaPlugin{
 										item.removeEnchantment(ench);
 										pl.sendMessage(pluginName + "Enchantment Failed, your enchantment was destroyed");
 									}else{
-										pl.sendMessage(pluginName + "Enchantment Failed, The Rune of Protection protected your enchantment");
+										pl.sendMessage(pluginName + "Enchantment Failed, '"+runeTxt+"' protected your enchantment");
 									}
 								}
 								pl.getInventory().setItemInMainHand(item);
