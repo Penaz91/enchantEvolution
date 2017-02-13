@@ -131,7 +131,7 @@ public class main extends JavaPlugin{
 								boolean hasRune = false;
 								ItemMeta meta = null;
 								List<String> lore = null;
-								boolean success = (rndGen.nextInt(100) + 1 <= failChance);
+								boolean success = (rndGen.nextInt(100) + 1 >= failChance);
 								int toRemove = 0;
 								if (item.hasItemMeta()){
 									meta = item.getItemMeta();
