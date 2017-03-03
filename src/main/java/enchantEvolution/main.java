@@ -36,7 +36,9 @@ public class main extends JavaPlugin{
 	public static Random rndGen = new Random();
 	public static String socketLore = "";
 	public static boolean sendMoneymsg = false;
+	public static boolean lowerLevel = false;
 	public static String runeTxt = "";
+	public static String NFString = "";
 	public static ConfigurationSection limits = null;
 	public static ConfigurationSection prices = null;
 	public static final Material[] weaponarr = {Material.WOOD_AXE, Material.WOOD_HOE, Material.WOOD_PICKAXE, Material.WOOD_SPADE, Material.WOOD_SWORD, Material.GOLD_AXE, Material.GOLD_BOOTS, Material.GOLD_CHESTPLATE, Material.GOLD_HELMET, Material.GOLD_HOE, Material.GOLD_LEGGINGS, Material.GOLD_PICKAXE, Material.GOLD_SPADE, Material.GOLD_SWORD, Material.IRON_AXE, Material.IRON_BOOTS, Material.IRON_CHESTPLATE, Material.IRON_HELMET, Material.IRON_HOE, Material.IRON_LEGGINGS, Material.IRON_PICKAXE, Material.IRON_SPADE, Material.IRON_SWORD,Material.DIAMOND_AXE, Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_HOE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_PICKAXE, Material.DIAMOND_SPADE, Material.DIAMOND_SWORD, Material.LEATHER_BOOTS, Material.LEATHER_CHESTPLATE, Material.LEATHER_HELMET,Material.LEATHER_LEGGINGS, Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS, Material.BOW, Material.FISHING_ROD, Material.SHIELD, Material.ELYTRA};
@@ -64,7 +66,9 @@ public class main extends JavaPlugin{
 		socketLore = cfg.getString("socketSpaceLore");
 		sendMoneymsg = cfg.getBoolean("sendMoneyMessage");
 		runeTxt = cfg.getString("runeText");
+		NFString = cfg.getString("nonForgeText");
 		limits = cfg.getConfigurationSection("levelCaps");
+		lowerLevel=cfg.getBoolean("lowerLevel");
 		getLogger().info("Plugin enabled");
 	}
 	@Override
@@ -96,6 +100,17 @@ public class main extends JavaPlugin{
 					return true;
 				}else{
 					ItemStack item = pl.getInventory().getItemInMainHand();
+					if (item.hasItemMeta()){
+						if (item.getItemMeta().hasLore()){
+							for (String l: item.getItemMeta().getLore()){
+								String cleanLore = ChatColor.stripColor(l);
+								if (cleanLore.equalsIgnoreCase(NFString)){
+									pl.sendMessage(pluginName + "This item's enchantments are not forgeable");
+									return true;
+								}
+							}
+						}
+					}
 					if (limitToWeapons){
 						Material type = item.getData().getItemType();
 						boolean found = false;
@@ -105,7 +120,7 @@ public class main extends JavaPlugin{
 							}
 						}
 						if (!found){
-							pl.sendMessage(pluginName + "This item is not enchantable");
+							pl.sendMessage(pluginName + "This item's enchantments are not forgeable");
 							return true;
 						}
 					}
@@ -158,30 +173,38 @@ public class main extends JavaPlugin{
 								}
 								if (success){
 									item.addUnsafeEnchantment(ench, level+1);
-									pl.sendMessage(pluginName + "Enchantment Completed with success!");
+									pl.sendMessage(pluginName + "Enchantment Forging Completed with success!");
+									return true;
 								}else{
 									if (!hasRune){
 										item.removeEnchantment(ench);
-										pl.sendMessage(pluginName + "Enchantment Failed, your enchantment was destroyed");
+										if(lowerLevel && level>0){
+											item.addUnsafeEnchantment(ench, Math.max(level-1,0));
+											pl.sendMessage(pluginName + "Enchantment Forging Failed, your enchantment was damaged");
+										}else{
+											pl.sendMessage(pluginName + "Enchantment Forging Failed, your enchantment was destroyed");
+										}
 									}else{
-										pl.sendMessage(pluginName + "Enchantment Failed, '"+runeTxt+"' protected your enchantment");
+										pl.sendMessage(pluginName + "Enchantment Forging Failed, '"+runeTxt+"' protected your enchantment");
 									}
 								}
 								pl.getInventory().setItemInMainHand(item);
 								item = null;
 								meta = null;
 								lore = null;
+								return true;
 							}else{
 								pl.sendMessage(pluginName+"You don't have enough money to do that!");
+								return true;
 							}
-							return true;
 						}else{
 							pl.sendMessage(pluginName+"This enchantment is capped");
+							return true;
 						}
 					}else{
 						pl.sendMessage(pluginName+"Enchantment name Not Valid");
+						return true;
 					}
-					return true;
 				}
 			}
 		}

@@ -5,8 +5,10 @@ failChance: 30
 limitToWeapons: true
 geometricEvolution: true
 geometricFactor: 2
+lowerLevel: false
 sendMoneyMessage: true
 runeText: "Rune of Protection"
+nonForgeText: "Non-Forgeable"
 levelCaps:
   ARROW_DAMAGE: 10
   ARROW_FIRE: 10
