@@ -1,0 +1,10 @@
+language: java
+deploy:
+  provider: releases
+  api_key:
+    secure: QhSdStsMfAeMf+6PG+68m2vzi5Ktw3/StdNtX68dahFMCS+gNY11GBb56iTM3X3sMo39+C/wWpW21ohtZ3RCXPpQyMQd/NsHz3j2pZr3NUejt9v7apNf2lS0X9+E6NISxPzvYhOQk//6KUlaKlxnbXyRyXtFYzkbmgxROo7+TdmkfvYNEF73HIuTIJI4l5uA5YwfzcAB3f7AvITAdncLL9286lv9OiD9zQLbDHTajhWoR1HxWQ1mnf2n6BgN9VikhUmG47TF0eWon/BaOPttt9urI/qlLU5TdaqtFRueTOagtc4oeC/HaRACiOMfVxeZsnzJKicCN5xYU2hZKb0RamZQJMjr7U3bFqdHLucloAZFtudmgmI4gQRY2ivwX4tySPVPVAdb5QI+PsUZCtopmcIw95xaQUmfwuDGSLQUZ7oFN0wjVw6B20iazqa5yf/Az8y/gJ5qWl9ro2rVamQFFDwtk1/pajM2dyWlVnuXZTVLlE11+yYYaGN7jWR5/ctYGOZsTqwEwhPp0krZgJMaILwXFgaxeJJJ8f1av2qWMrEGfybuHM+GWJaoMKK/hDy6PnA73uPzne74APP3/TPjbDyDHC9phubzTnCBt0lvIUvsnRuuTEjK1dQr/OPw53fLSUO++g1WoAIodWcpVy4fsp3E7s2hMhkl4WHbw7T8c14=
+  file: target/enchantEvolution-0.0.1-SNAPSHOT.jar
+  on:
+    repo: Penaz91/enchantEvolution
+  skip_cleanup: true
+  name: 0.0.2 Build $(date +'%d/%m/%Y %R')
